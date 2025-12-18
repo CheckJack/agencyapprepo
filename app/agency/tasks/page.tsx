@@ -92,10 +92,16 @@ export default async function AgencyTasksPage({
     orderBy: { name: 'asc' }
   })
 
+  // Serialize dates for client component
+  const serializedTasks = tasks.map(task => ({
+    ...task,
+    dueDate: task.dueDate ? task.dueDate.toISOString() : null,
+  }))
+
   return (
     <Layout type="agency">
       <TasksClient 
-        tasks={tasks} 
+        tasks={serializedTasks} 
         projects={projects}
         agencyUsers={agencyUsers}
       />

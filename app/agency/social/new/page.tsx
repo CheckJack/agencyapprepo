@@ -66,7 +66,7 @@ export default function NewSocialMediaPostPage() {
 
   // Update content styles when platform changes
   useEffect(() => {
-    if (formData.platform) {
+    if (formData.platform && formData.contentStyle) {
       const styles = getContentStylesForPlatform(formData.platform)
       if (!styles.includes(formData.contentStyle)) {
         setFormData(prev => ({ ...prev, contentStyle: '' as ContentStyle | '' }))

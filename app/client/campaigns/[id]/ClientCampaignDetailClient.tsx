@@ -108,8 +108,12 @@ export function ClientCampaignDetailClient({ campaign: initialCampaign }: Client
           pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
           
           // Get the full URL for the PDF
-          const pdfUrl = campaign.pdfAttachment.startsWith('http') 
-            ? campaign.pdfAttachment 
+          if (!campaign.pdfAttachment) {
+            throw new Error('No PDF attachment available')
+          }
+          
+          const pdfUrl = campaign.pdfAttachment.startsWith('http')
+            ? campaign.pdfAttachment
             : `${window.location.origin}${campaign.pdfAttachment}`
           
           console.log('Loading PDF from URL:', pdfUrl)

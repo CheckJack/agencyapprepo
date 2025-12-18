@@ -21,6 +21,7 @@ interface SocialMediaPost {
   status: string
   rejectionReason: string | null
   publishedAt: Date | null
+  createdAt: Date | string
   client: {
     id: string
     name: string

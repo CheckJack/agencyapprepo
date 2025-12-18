@@ -38,23 +38,25 @@ export default async function ClientUsersPage({
 
   return (
     <Layout type="agency">
-      <div className="px-4 sm:px-6 lg:px-8">
-        <ClientDetailHeader
-          client={client}
-          userCount={client.users.length}
-          projectCount={client._count.projects}
-          campaignCount={client._count.campaigns}
-        />
-
-        {/* Users Section */}
-        <div>
-          <ClientUsersList 
-            clientId={client.id} 
-            users={client.users.map(user => ({
-              ...user,
-              createdAt: user.createdAt.toISOString()
-            }))} 
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        <div className="w-full py-8">
+          <ClientDetailHeader
+            client={client}
+            userCount={client.users.length}
+            projectCount={client._count.projects}
+            campaignCount={client._count.campaigns}
           />
+
+          {/* Users Section */}
+          <div className="mt-8">
+            <ClientUsersList 
+              clientId={client.id} 
+              users={client.users.map(user => ({
+                ...user,
+                createdAt: user.createdAt.toISOString()
+              }))} 
+            />
+          </div>
         </div>
       </div>
     </Layout>

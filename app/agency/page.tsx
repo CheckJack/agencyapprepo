@@ -33,110 +33,115 @@ export default async function AgencyDashboard() {
 
   return (
     <Layout type="agency">
-      <div className="px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Agency Dashboard</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Welcome back, {session.user.name}
-          </p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        <div className="w-full py-8">
+          {/* Hero Header Section */}
+          <div className="mb-10">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 mb-2">
+                Agency Dashboard
+              </h1>
+              <p className="text-base text-gray-600">
+                Welcome back, <span className="font-medium text-gray-900">{session.user.name}</span>
+              </p>
+            </div>
+          </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <Users className="h-6 w-6 text-gray-400" />
+          {/* Key Metrics Cards - Improved Design */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-10">
+            {/* Total Clients Card */}
+            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-all duration-200 group">
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-2.5 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors">
+                  <Users className="h-5 w-5 text-blue-600" />
                 </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Total Clients
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900">
-                      {totalClients}
-                    </dd>
-                  </dl>
+              </div>
+              <div className="mb-1">
+                <p className="text-3xl font-bold text-gray-900">{totalClients}</p>
+              </div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">Total Clients</h3>
+              <p className="text-xs text-gray-500">All client accounts</p>
+            </div>
+
+            {/* Active Projects Card */}
+            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-all duration-200 group">
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-2.5 bg-purple-50 rounded-lg group-hover:bg-purple-100 transition-colors">
+                  <FolderKanban className="h-5 w-5 text-purple-600" />
+                </div>
+              </div>
+              <div className="mb-1">
+                <p className="text-3xl font-bold text-gray-900">{totalProjects}</p>
+              </div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">Active Projects</h3>
+              <p className="text-xs text-gray-500">Projects in progress</p>
+            </div>
+
+            {/* Active Campaigns Card */}
+            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-all duration-200 group">
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-2.5 bg-amber-50 rounded-lg group-hover:bg-amber-100 transition-colors">
+                  <Mail className="h-5 w-5 text-amber-600" />
+                </div>
+              </div>
+              <div className="mb-1">
+                <p className="text-3xl font-bold text-gray-900">{activeCampaigns}</p>
+              </div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">Active Campaigns</h3>
+              <p className="text-xs text-gray-500">Running campaigns</p>
+            </div>
+
+            {/* Total Revenue Card */}
+            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-all duration-200 group">
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-2.5 bg-green-50 rounded-lg group-hover:bg-green-100 transition-colors">
+                  <DollarSign className="h-5 w-5 text-green-600" />
+                </div>
+              </div>
+              <div className="mb-1">
+                <p className="text-3xl font-bold text-gray-900">${totalRevenue.toLocaleString()}</p>
+              </div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">Total Revenue</h3>
+              <p className="text-xs text-gray-500">Paid invoices</p>
+            </div>
+          </div>
+
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="px-6 py-5 border-b border-gray-100">
+                <h2 className="text-lg font-semibold text-gray-900">Recent Projects</h2>
+                <p className="text-sm text-gray-500 mt-1">Latest project activity</p>
+              </div>
+              <div className="p-6">
+                <div className="text-center py-12">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                    <FolderKanban className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-base font-semibold text-gray-900 mb-2">No recent projects</h3>
+                  <p className="text-sm text-gray-500 max-w-sm mx-auto">
+                    Your recent projects will appear here once created.
+                  </p>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <FolderKanban className="h-6 w-6 text-gray-400" />
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Active Projects
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900">
-                      {totalProjects}
-                    </dd>
-                  </dl>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="px-6 py-5 border-b border-gray-100">
+                <h2 className="text-lg font-semibold text-gray-900">Recent Clients</h2>
+                <p className="text-sm text-gray-500 mt-1">Latest client activity</p>
+              </div>
+              <div className="p-6">
+                <div className="text-center py-12">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                    <Users className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-base font-semibold text-gray-900 mb-2">No recent clients</h3>
+                  <p className="text-sm text-gray-500 max-w-sm mx-auto">
+                    Your recent clients will appear here once added.
+                  </p>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <Mail className="h-6 w-6 text-gray-400" />
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Active Campaigns
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900">
-                      {activeCampaigns}
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <DollarSign className="h-6 w-6 text-gray-400" />
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Total Revenue
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900">
-                      ${totalRevenue.toLocaleString()}
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Recent Projects</h2>
-            <div className="space-y-4">
-              {/* Recent projects will be loaded here */}
-              <p className="text-sm text-gray-500">No recent projects</p>
-            </div>
-          </div>
-
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Recent Clients</h2>
-            <div className="space-y-4">
-              {/* Recent clients will be loaded here */}
-              <p className="text-sm text-gray-500">No recent clients</p>
             </div>
           </div>
         </div>

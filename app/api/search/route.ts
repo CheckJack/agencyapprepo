@@ -31,9 +31,9 @@ export async function GET(request: NextRequest) {
       where: {
         clientId,
         OR: [
-          { name: { contains: searchTerm, mode: 'insensitive' } },
-          { description: { contains: searchTerm, mode: 'insensitive' } },
-          { emailSubject: { contains: searchTerm, mode: 'insensitive' } },
+          { name: { contains: searchTerm } },
+          { description: { contains: searchTerm } },
+          { emailSubject: { contains: searchTerm } },
         ],
       },
       take: limit,
@@ -52,9 +52,9 @@ export async function GET(request: NextRequest) {
       where: {
         clientId,
         OR: [
-          { title: { contains: searchTerm, mode: 'insensitive' } },
-          { excerpt: { contains: searchTerm, mode: 'insensitive' } },
-          { content: { contains: searchTerm, mode: 'insensitive' } },
+          { title: { contains: searchTerm } },
+          { excerpt: { contains: searchTerm } },
+          { content: { contains: searchTerm } },
         ],
       },
       take: limit,
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
     const socialPosts = await prisma.socialMediaPost.findMany({
       where: {
         clientId,
-        content: { contains: searchTerm, mode: 'insensitive' },
+        content: { contains: searchTerm },
       },
       take: limit,
       select: {
@@ -90,8 +90,8 @@ export async function GET(request: NextRequest) {
       where: {
         clientId,
         OR: [
-          { title: { contains: searchTerm, mode: 'insensitive' } },
-          { description: { contains: searchTerm, mode: 'insensitive' } },
+          { title: { contains: searchTerm } },
+          { description: { contains: searchTerm } },
         ],
       },
       take: limit,
@@ -109,8 +109,8 @@ export async function GET(request: NextRequest) {
       where: {
         clientId,
         OR: [
-          { invoiceNumber: { contains: searchTerm, mode: 'insensitive' } },
-          { description: { contains: searchTerm, mode: 'insensitive' } },
+          { invoiceNumber: { contains: searchTerm } },
+          { description: { contains: searchTerm } },
         ],
       },
       take: limit,

@@ -124,6 +124,10 @@ export async function POST(request: NextRequest) {
       targetClientId = clientId
     }
 
+    if (!targetClientId) {
+      return NextResponse.json({ error: 'clientId is required' }, { status: 400 })
+    }
+
     const setting = await prisma.notificationSetting.upsert({
       where: {
         clientId_action: {

@@ -48,17 +48,19 @@ export default async function ClientProjectsPage({
 
   return (
     <Layout type="agency">
-      <div className="px-4 sm:px-6 lg:px-8">
-        <ClientDetailHeader
-          client={client}
-          userCount={client.users.length}
-          projectCount={client.projects.length}
-          campaignCount={client._count.campaigns}
-        />
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        <div className="w-full py-8">
+          <ClientDetailHeader
+            client={client}
+            userCount={client.users.length}
+            projectCount={client.projects.length}
+            campaignCount={client._count.campaigns}
+          />
 
-        {/* Projects Section */}
-        <div>
-          <ClientProjectsList clientId={client.id} projects={client.projects} />
+          {/* Projects Section */}
+          <div className="mt-8">
+            <ClientProjectsList clientId={client.id} projects={client.projects} />
+          </div>
         </div>
       </div>
     </Layout>

@@ -38,17 +38,19 @@ export default async function ClientDetailPage({
 
   return (
     <Layout type="agency">
-      <div className="px-4 sm:px-6 lg:px-8">
-        <ClientDetailHeader
-          client={client}
-          userCount={client.users.length}
-          projectCount={client._count.projects}
-          campaignCount={client._count.campaigns}
-        />
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        <div className="w-full py-8">
+          <ClientDetailHeader
+            client={client}
+            userCount={client.users.length}
+            projectCount={client._count.projects}
+            campaignCount={client._count.campaigns}
+          />
 
-        {/* Portal Settings Section */}
-        <div>
-          <ClientPortalSettings client={client} />
+          {/* Portal Settings Section */}
+          <div className="mt-8">
+            <ClientPortalSettings client={client} />
+          </div>
         </div>
       </div>
     </Layout>

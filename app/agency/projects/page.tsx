@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
+import { FolderKanban, Calendar } from 'lucide-react'
 
 export default async function AgencyProjectsPage() {
   const session = await getServerSession()
@@ -48,84 +49,98 @@ export default async function AgencyProjectsPage() {
 
   return (
     <Layout type="agency">
-      <div className="px-4 sm:px-6 lg:px-8">
-        <div className="sm:flex sm:items-center mb-6">
-          <div className="sm:flex-auto">
-            <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
-            <p className="mt-2 text-sm text-gray-600">
-              Manage all client projects
-            </p>
-          </div>
-          <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        <div className="w-full py-8">
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-gray-900">Projects</h1>
+              <p className="mt-2 text-base text-gray-600">
+                Manage all client projects
+              </p>
+            </div>
             <Link
               href="/agency/projects/new"
-              className="inline-flex items-center justify-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500"
+              className="inline-flex items-center justify-center rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 transition-all"
             >
               <Plus className="w-4 h-4 mr-2" />
               New Project
             </Link>
           </div>
-        </div>
 
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            {projects.length === 0 ? (
-              <p className="text-sm text-gray-500 text-center py-8">
-                No projects found
-              </p>
-            ) : (
-              <div className="space-y-4">
-                {projects.map((project) => (
-                  <div
-                    key={project.id}
-                    className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <h3 className="text-lg font-medium text-gray-900">
-                            {project.title}
-                          </h3>
-                          <Link
-                            href={`/agency/clients/${project.client.id}`}
-                            className="text-sm text-primary-600 hover:text-primary-900"
-                          >
-                            ({project.client.companyName})
-                          </Link>
-                        </div>
-                        {project.description && (
-                          <p className="text-sm text-gray-500 mb-2">
-                            {project.description}
-                          </p>
-                        )}
-                        <div className="flex items-center space-x-4 text-sm text-gray-500">
-                          <span>
-                            {project._count.tasks} task{project._count.tasks !== 1 ? 's' : ''}
-                          </span>
-                          {project.startDate && (
-                            <span>
-                              Started: {formatDate(project.startDate)}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div className="px-6 py-5 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-gray-700">
+                  {projects.length} {projects.length === 1 ? 'project' : 'projects'} total
+                </p>
+              </div>
+            </div>
+            <div className="p-6">
+              {projects.length === 0 ? (
+                <div className="text-center py-16">
+                  <FolderKanban className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No projects yet</h3>
+                  <p className="text-sm text-gray-500 max-w-md mx-auto">
+                    Your projects will appear here once they are created.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {projects.map((project) => (
+                    <Link
+                      key={project.id}
+                      href={`/agency/projects/${project.id}`}
+                      className="block border border-gray-200 rounded-xl p-5 hover:border-primary-300 hover:shadow-md transition-all"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-3 mb-3">
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              {project.title}
+                            </h3>
+                            <Link
+                              href={`/agency/clients/${project.client.id}`}
+                              className="text-sm text-primary-600 hover:text-primary-900 transition-colors"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              ({project.client.companyName})
+                            </Link>
+                            <span
+                              className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold leading-5 whitespace-nowrap ${getStatusColor(
+                                project.status
+                              )}`}
+                            >
+                              {project.status.replace('_', ' ')}
                             </span>
+                          </div>
+                          {project.description && (
+                            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                              {project.description}
+                            </p>
                           )}
-                          {project.budget && (
+                          <div className="flex items-center space-x-6 text-sm text-gray-500">
                             <span>
-                              Budget: ${project.budget.toLocaleString()}
+                              {project._count.tasks} task{project._count.tasks !== 1 ? 's' : ''}
                             </span>
-                          )}
+                            {project.startDate && (
+                              <div className="flex items-center">
+                                <Calendar className="h-4 w-4 mr-1.5" />
+                                <span>Started: {formatDate(project.startDate)}</span>
+                              </div>
+                            )}
+                            {project.budget && (
+                              <span className="font-medium text-gray-700">
+                                Budget: ${project.budget.toLocaleString()}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                      <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold leading-5 ${getStatusColor(
-                          project.status
-                        )}`}
-                      >
-                        {project.status.replace('_', ' ')}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

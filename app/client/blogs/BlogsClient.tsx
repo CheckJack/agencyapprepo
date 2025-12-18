@@ -560,7 +560,7 @@ export function BlogsClient({ posts: initialPosts }: BlogsClientProps) {
                   content={previewPost.content}
                   featuredImage={previewPost.featuredImage || undefined}
                   author={previewPost.author || undefined}
-                  publishedAt={previewPost.publishedAt || undefined}
+                  publishedAt={previewPost.publishedAt ? (typeof previewPost.publishedAt === 'string' ? previewPost.publishedAt : previewPost.publishedAt.toISOString()) : undefined}
                 />
               </div>
             </div>

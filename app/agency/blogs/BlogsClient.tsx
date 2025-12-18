@@ -115,29 +115,28 @@ export function BlogsClient({ posts: initialPosts, clients }: SocialMediaClientP
   const rejectedPosts = filteredPosts.filter(p => p.status === 'rejected')
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <div className="w-full py-8">
+        {/* Header */}
+        <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Blog Posts</h1>
-            <p className="mt-2 text-sm text-gray-600">
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900">Blog Posts</h1>
+            <p className="mt-2 text-base text-gray-600">
               Manage and review blog posts
             </p>
           </div>
           <Link
             href="/agency/blogs/new"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
+            className="inline-flex items-center px-4 py-2.5 border border-transparent text-sm font-semibold rounded-lg text-white bg-primary-600 hover:bg-primary-700 transition-all"
           >
             <Plus className="w-4 h-4 mr-2" />
             New Post
           </Link>
         </div>
-      </div>
 
-      {/* Search and Filters */}
-      <div className="bg-white shadow rounded-lg mb-6">
-        <div className="px-4 py-5 sm:p-6">
+        {/* Search and Filters */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
+        <div className="px-6 py-5 border-b border-gray-200">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
@@ -147,13 +146,13 @@ export function BlogsClient({ posts: initialPosts, clients }: SocialMediaClientP
                   placeholder="Search posts..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
                 />
               </div>
             </div>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              className="inline-flex items-center px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
             >
               <Filter className="w-4 h-4 mr-2" />
               Filters
@@ -243,8 +242,15 @@ export function BlogsClient({ posts: initialPosts, clients }: SocialMediaClientP
       )}
 
       {/* Posts List */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div className="px-6 py-5 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-gray-700">
+              {filteredPosts.length} {filteredPosts.length === 1 ? 'post' : 'posts'} {searchTerm || statusFilter !== 'all' || clientFilter !== 'all' ? 'found' : 'total'}
+            </p>
+          </div>
+        </div>
+        <div className="p-6">
           {filteredPosts.length === 0 ? (
             <p className="text-sm text-gray-500 text-center py-8">
               No blog posts found
@@ -254,7 +260,7 @@ export function BlogsClient({ posts: initialPosts, clients }: SocialMediaClientP
               {filteredPosts.map((post) => (
                 <div
                   key={post.id}
-                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                  className="border border-gray-200 rounded-xl p-5 hover:border-primary-300 hover:shadow-md transition-all"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
@@ -333,6 +339,7 @@ export function BlogsClient({ posts: initialPosts, clients }: SocialMediaClientP
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   )

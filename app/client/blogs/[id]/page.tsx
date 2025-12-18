@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation'
 import { Layout } from '@/components/Layout'
 import { prisma } from '@/lib/prisma'
 import { BlogPreview } from '@/components/BlogPreview'
+import { Breadcrumbs } from '@/components/Breadcrumbs'
 
 export default async function ClientBlogPostPage({
   params,
