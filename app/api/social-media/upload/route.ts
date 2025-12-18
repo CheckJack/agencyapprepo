@@ -1,0 +1,76 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from '@/lib/auth-server'
+import { writeFile, mkdir } from 'fs/promises'
+import { join } from 'path'
+import { existsSync } from 'fs'
+
+export async function POST(request: NextRequest) {
+  const session = await getServerSession()
+  
+  if (!session || (session.user.role !== 'AGENCY_ADMIN' && session.user.role !== 'AGENCY_STAFF')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  try {
+    const formData = await request.formData()
+    const files = formData.getAll('files') as File[]
+
+    if (!files || files.length === 0) {
+      return NextResponse.json({ error: 'No files provided' }, { status: 400 })
+    }
+
+    // Validate file types and sizes
+    const maxSize = 100 * 1024 * 1024 // 100MB
+    const allowedImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+    const allowedVideoTypes = ['video/mp4', 'video/mpeg', 'video/quicktime', 'video/x-msvideo']
+
+    const uploadedUrls: string[] = []
+
+    // Create uploads directory if it doesn't exist
+    const uploadsDir = join(process.cwd(), 'public', 'uploads', 'social-media')
+    if (!existsSync(uploadsDir)) {
+      await mkdir(uploadsDir, { recursive: true })
+    }
+
+    for (const file of files) {
+      // Validate file type
+      const isValidImage = allowedImageTypes.includes(file.type)
+      const isValidVideo = allowedVideoTypes.includes(file.type)
+      
+      if (!isValidImage && !isValidVideo) {
+        return NextResponse.json({ 
+          error: `Invalid file type: ${file.name}. Only images and videos are allowed.` 
+        }, { status: 400 })
+      }
+
+      // Validate file size
+      if (file.size > maxSize) {
+        return NextResponse.json({ 
+          error: `File ${file.name} is too large. Maximum size is 100MB.` 
+        }, { status: 400 })
+      }
+
+      // Generate unique filename
+      const timestamp = Date.now()
+      const randomStr = Math.random().toString(36).substring(2, 15)
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+      const filename = `${timestamp}-${randomStr}-${sanitizedName}`
+      const filepath = join(uploadsDir, filename)
+
+      // Convert file to buffer and save
+      const bytes = await file.arrayBuffer()
+      const buffer = Buffer.from(bytes)
+      await writeFile(filepath, buffer)
+
+      // Return the public URL path
+      const publicUrl = `/uploads/social-media/${filename}`
+      uploadedUrls.push(publicUrl)
+    }
+
+    return NextResponse.json({ urls: uploadedUrls })
+  } catch (error) {
+    console.error('File upload error:', error)
+    return NextResponse.json({ error: 'Failed to upload files' }, { status: 500 })
+  }
+}
+

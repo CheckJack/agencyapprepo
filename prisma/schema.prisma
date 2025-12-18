@@ -1,0 +1,504 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Enums converted to String for SQLite compatibility
+// UserRole: AGENCY_ADMIN, AGENCY_STAFF, CLIENT_ADMIN, CLIENT_USER
+// ProjectStatus: PLANNING, IN_PROGRESS, ON_HOLD, COMPLETED, CANCELLED
+// CampaignStatus: DRAFT, REVIEW
+// CampaignType: EMAIL, SOCIAL_MEDIA, BLOG
+// BillingStatus: DRAFT, SENT, PAID, OVERDUE, CANCELLED
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password      String
+  name          String
+  role          String   // AGENCY_ADMIN, AGENCY_STAFF, CLIENT_ADMIN, CLIENT_USER
+  profilePhoto  String?
+  clientId      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  client        Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  sentMessages  Message[]
+  activityLogs  ActivityLog[]
+  comments      Comment[]
+  preferences   UserPreference[]
+  interactions  Interaction[]
+  clientNotes   ClientNote[]
+  assignedTasks Task[] @relation("AssignedTasks")
+  
+  @@index([email])
+  @@index([clientId])
+}
+
+model Client {
+  id                String   @id @default(cuid())
+  name              String
+  companyName       String
+  email             String   @unique
+  phone             String?
+  address           String?
+  logo              String?
+  cover             String?
+  website           String?
+  status            String   @default("active") // active, inactive, suspended
+  portalEnabled     Boolean  @default(true)
+  campaignsEnabled  Boolean  @default(true)
+  socialMediaEnabled Boolean @default(true)
+  blogsEnabled      Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  users           User[]
+  projects        Project[]
+  campaigns       Campaign[]
+  blogPosts       BlogPost[]
+  invoices        Invoice[]
+  socialMediaPosts SocialMediaPost[]
+  messages        Message[]
+  notifications   Notification[]
+  notificationSettings NotificationSetting[]
+  searchHistory   SearchHistory[]
+  contacts        Contact[]
+  interactions    Interaction[]
+  deals           Deal[]
+  tags            ClientTag[]
+  notes           ClientNote[]
+  
+  @@index([email])
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  content     String
+  senderId    String   // User ID of the sender
+  clientId    String?  // Client ID (null for agency-to-agency messages)
+  isRead      Boolean  @default(false)
+  readAt      DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  sender      User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  client      Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  attachments MessageAttachment[]
+  
+  @@index([senderId])
+  @@index([clientId])
+  @@index([createdAt])
+  @@index([isRead])
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  title       String
+  description String?
+  status      String   @default("PLANNING") // PLANNING, IN_PROGRESS, ON_HOLD, COMPLETED, CANCELLED
+  startDate   DateTime?
+  endDate     DateTime?
+  budget      Float?
+  clientId    String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime       @updatedAt
+  
+  client      Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  tasks       Task[]
+  files       ProjectFile[]
+  
+  @@index([clientId])
+  @@index([status])
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  completed   Boolean  @default(false)
+  dueDate     DateTime?
+  priority    String   @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  status      String   @default("TODO") // TODO, IN_PROGRESS, IN_REVIEW, COMPLETED, CANCELLED
+  projectId   String?
+  assignedToId String? // User ID of assigned agency staff
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  project     Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignedTo User?    @relation("AssignedTasks", fields: [assignedToId], references: [id], onDelete: SetNull)
+  
+  @@index([projectId])
+  @@index([assignedToId])
+  @@index([status])
+  @@index([priority])
+  @@index([dueDate])
+}
+
+model Campaign {
+  id              String        @id @default(cuid())
+  name            String
+  description     String?
+  type            String   // EMAIL, SOCIAL_MEDIA, BLOG
+  status          String   @default("DRAFT") // DRAFT, REVIEW, REJECTED
+  scheduledDate   DateTime? // When the email campaign should be sent
+  rejectionReason String?  // Reason for rejection
+  clientId        String
+  // Email campaign fields
+  emailSubject    String?  // Email subject line
+  emailBody       String?  // Email body/message text
+  pdfAttachment   String?  // PDF file path/URL
+  thumbnail       String?  // Cover image/thumbnail URL
+  fromName        String?  // Display name for sender
+  fromEmail       String?  // Sender email address
+  replyToEmail    String?  // Reply-to email address
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  client      Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  metrics     CampaignMetric[]
+  
+  @@index([clientId])
+  @@index([type])
+  @@index([status])
+}
+
+model CampaignMetric {
+  id          String   @id @default(cuid())
+  campaignId  String
+  date        DateTime @default(now())
+  impressions Int      @default(0)
+  clicks      Int      @default(0)
+  conversions Int      @default(0)
+  revenue     Float    @default(0)
+  createdAt   DateTime @default(now())
+  
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  
+  @@index([campaignId])
+  @@index([date])
+}
+
+model SocialMediaPost {
+  id              String   @id @default(cuid())
+  platform        String   // facebook, instagram, twitter, linkedin, tiktok
+  contentStyle    String   // post, story, reel, carousel, video, tweet, thread, poll, article, igtv
+  content         String?  // Text content/description
+  images          String?  // JSON array of image URLs
+  videoUrl        String?  // Video URL
+  link            String?  // Link URL (for some platforms)
+  scheduledAt     DateTime? // Scheduled date/time
+  timezone        String?  // Timezone for scheduling (e.g., "America/New_York")
+  status          String   @default("draft") // draft, pending_review, approved, rejected, published
+  rejectionReason String?  // Reason for rejection
+  publishedAt     DateTime?
+  engagement      String?  // JSON string: likes, shares, comments, etc.
+  clientId        String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  client          Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  @@index([clientId])
+  @@index([platform])
+  @@index([contentStyle])
+  @@index([status])
+  @@index([scheduledAt])
+}
+
+model BlogPost {
+  id              String   @id @default(cuid())
+  title           String
+  slug            String   @unique
+  content         String
+  excerpt         String?
+  featuredImage   String?
+  author          String?
+  status          String   @default("draft") // draft, pending_review, approved, rejected
+  rejectionReason String?  // Reason for rejection
+  published       Boolean  @default(false)
+  publishedAt     DateTime?
+  views           Int      @default(0)
+  engagement      String?  // JSON string: likes, shares, comments, etc.
+  tags            String?  // JSON array of tags
+  categories      String?  // JSON array of categories
+  clientId        String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  client          Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  @@index([clientId])
+  @@index([slug])
+  @@index([published])
+  @@index([status])
+}
+
+model Invoice {
+  id          String        @id @default(cuid())
+  invoiceNumber String      @unique
+  clientId    String
+  amount      Float
+  tax         Float         @default(0)
+  total       Float
+  status      String   @default("DRAFT") // DRAFT, SENT, PAID, OVERDUE, CANCELLED
+  dueDate     DateTime
+  paidDate    DateTime?
+  description String?
+  items       String?  // JSON string: Array of line items
+  paymentLink String?  // Payment link URL for clients to pay
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  client      Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  @@index([clientId])
+  @@index([status])
+  @@index([invoiceNumber])
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  title       String
+  text        String
+  thumbnail   String?  // Image URL
+  clientId    String?  // null for all clients
+  isRead      Boolean  @default(false)
+  readAt      DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  client      Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  @@index([clientId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+model NotificationSetting {
+  id          String   @id @default(cuid())
+  clientId    String
+  action      String   // e.g., "campaign_approved", "blog_published", "invoice_sent", etc.
+  enabled     Boolean  @default(true)
+  emailEnabled Boolean @default(true) // Email notification preference
+  inAppEnabled Boolean @default(true) // In-app notification preference
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  @@unique([clientId, action])
+  @@index([clientId])
+}
+
+// New models for enhanced features
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  userId      String
+  action      String   // e.g., "campaign_approved", "blog_created", "invoice_viewed"
+  entityType  String   // e.g., "Campaign", "BlogPost", "Invoice"
+  entityId    String
+  details     String?  // JSON string with additional details
+  createdAt   DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+model Comment {
+  id          String   @id @default(cuid())
+  content     String
+  userId      String
+  entityType  String   // "Campaign", "BlogPost", "SocialMediaPost", "Project"
+  entityId    String
+  parentId    String?  // For threaded comments
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent      Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     Comment[] @relation("CommentReplies")
+  
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([parentId])
+  @@index([createdAt])
+}
+
+model MessageAttachment {
+  id          String   @id @default(cuid())
+  messageId   String
+  fileName    String
+  filePath    String
+  fileSize    Int      // Size in bytes
+  mimeType    String
+  createdAt   DateTime @default(now())
+  
+  message     Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  
+  @@index([messageId])
+}
+
+model SearchHistory {
+  id          String   @id @default(cuid())
+  clientId   String
+  query      String
+  results    Int      // Number of results found
+  createdAt  DateTime @default(now())
+  
+  client     Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  @@index([clientId])
+  @@index([createdAt])
+}
+
+model UserPreference {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  darkMode    Boolean  @default(false)
+  language    String   @default("en")
+  timezone    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+}
+
+model DocumentVersion {
+  id          String   @id @default(cuid())
+  entityType  String   // "BlogPost", "SocialMediaPost"
+  entityId    String
+  version     Int      @default(1)
+  content     String   // JSON string with document data
+  changes     String?  // JSON string describing changes
+  createdBy   String?  // User ID
+  createdAt   DateTime @default(now())
+  
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+model ProjectFile {
+  id          String   @id @default(cuid())
+  projectId   String
+  fileName    String
+  filePath    String
+  fileSize    Int      // Size in bytes
+  mimeType    String
+  uploadedBy  String?  // User ID
+  createdAt   DateTime @default(now())
+  
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@index([projectId])
+  @@index([createdAt])
+}
+
+// CRM Models
+
+model Contact {
+  id          String   @id @default(cuid())
+  clientId    String
+  firstName   String
+  lastName    String
+  email       String?
+  phone       String?
+  title       String?  // Job title
+  department  String?
+  notes       String?
+  isPrimary   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  @@index([clientId])
+  @@index([email])
+}
+
+model Interaction {
+  id          String   @id @default(cuid())
+  clientId    String
+  userId      String   // Agency user who created the interaction
+  type        String   // call, email, meeting, note, task
+  subject     String?
+  description String
+  date        DateTime @default(now())
+  duration    Int?     // Duration in minutes (for calls/meetings)
+  outcome     String?  // follow_up_needed, resolved, no_action, etc.
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([clientId])
+  @@index([userId])
+  @@index([type])
+  @@index([date])
+}
+
+model Deal {
+  id          String   @id @default(cuid())
+  clientId    String
+  name        String
+  description String?
+  value       Float
+  stage       String   @default("prospecting") // prospecting, qualification, proposal, negotiation, won, lost
+  probability Int      @default(0) // 0-100 percentage
+  expectedCloseDate DateTime?
+  actualCloseDate DateTime?
+  lostReason  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  @@index([clientId])
+  @@index([stage])
+  @@index([expectedCloseDate])
+}
+
+model ClientTag {
+  id          String   @id @default(cuid())
+  clientId    String
+  name        String
+  color       String?  // Hex color code
+  createdAt   DateTime @default(now())
+  
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  @@index([clientId])
+  @@unique([clientId, name])
+}
+
+model ClientNote {
+  id          String   @id @default(cuid())
+  clientId    String
+  userId      String   // Agency user who created the note
+  title       String?
+  content     String
+  isPrivate   Boolean  @default(false) // Private notes only visible to creator
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([clientId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
